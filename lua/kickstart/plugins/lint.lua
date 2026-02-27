@@ -6,7 +6,42 @@ return {
     config = function()
       local lint = require 'lint'
       lint.linters_by_ft = {
+        -- Python linters (use LSP for ruff diagnostics to avoid duplicates)
+        python = {},
+        -- C/C++ linters
+        c = { 'cpplint', 'cppcheck' },
+        cpp = { 'cpplint', 'cppcheck' },
+        -- Go linters
+        go = { 'golangcilint' },
+        -- LaTeX linters
+        tex = { 'chktex' },
+        latex = { 'chktex' },
+        -- Markdown linters
         markdown = { 'markdownlint' },
+      }
+
+      
+
+      lint.linters.cppcheck = {
+        cmd = 'cppcheck',
+        stdin = false,
+        args = {
+          '--enable=all',
+          '--template=gcc',
+          function()
+            return vim.fn.expand '%'
+          end,
+        },
+        stream = 'stderr',
+        ignore_exitcode = true,
+        parser = require('lint.parser').from_pattern('([^:]+):(%d+):(%d+): (%w+): (.+)', { 'file', 'lnum', 'col', 'severity', 'message' }, {
+          ['error'] = vim.diagnostic.severity.ERROR,
+          ['warning'] = vim.diagnostic.severity.WARN,
+          ['style'] = vim.diagnostic.severity.INFO,
+          ['performance'] = vim.diagnostic.severity.INFO,
+          ['portability'] = vim.diagnostic.severity.HINT,
+          ['information'] = vim.diagnostic.severity.HINT,
+        }),
       }
 
       -- To allow other plugins to add linters to require('lint').linters_by_ft,
