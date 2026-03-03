@@ -3,8 +3,50 @@
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+-- Rainbow highlight groups (for indent-blankline and rainbow-delimiters)
+-- derived from active colorscheme. Re-applies on colorscheme change.
+local function set_rainbow_hl()
+  local function fg_of(group, fallback)
+    local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+    if ok and hl and hl.fg then
+      return string.format('#%06x', hl.fg)
+    end
+    return fallback
+  end
+
+  -- Theme-aware colors for rainbow effects
+  local colors = {
+    { name = 'Red', fg = fg_of('DiagnosticError', '#E06C75') },
+    { name = 'Yellow', fg = fg_of('DiagnosticWarn', '#E5C07B') },
+    { name = 'Green', fg = fg_of('DiagnosticHint', '#98C379') },
+    { name = 'Cyan', fg = fg_of('DiagnosticInfo', '#56B6C2') },
+    { name = 'Blue', fg = fg_of('Function', '#61AFEF') },
+    { name = 'Violet', fg = fg_of('Keyword', '#C678DD') },
+  }
+
+  for i, c in ipairs(colors) do
+    -- indent-blankline groups
+    vim.api.nvim_set_hl(0, 'IndentBlanklineChar' .. i, { fg = c.fg, nocombine = true })
+    -- rainbow-delimiters groups
+    vim.api.nvim_set_hl(0, 'RainbowDelimiter' .. c.name, { fg = c.fg })
+  end
+end
+
+-- Apply once now (before plugins load).
+set_rainbow_hl()
+
+-- Re-apply after every colorscheme change.
+vim.api.nvim_create_autocmd('ColorScheme', {
+  group = vim.api.nvim_create_augroup('RainbowHl', { clear = true }),
+  callback = function()
+    set_rainbow_hl()
+    vim.schedule(set_rainbow_hl)
+  end,
+})
 -- Load LSP nil-registration guard early to avoid ipairs errors
-pcall(function() require('custom.lsp_guard') end)
+pcall(function()
+  require 'custom.lsp_guard'
+end)
 vim.opt.diffopt:append 'vertical'
 
 vim.opt.foldmethod = 'manual' -- UFO will manage folds
@@ -92,17 +134,16 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('i', 'jj', '<Esc>:write<CR>', { desc = 'Exit insert mode and save' })
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', function()
-  vim.diagnostic.setqflist({ open = true })
+  vim.diagnostic.setqflist { open = true }
 end, { desc = 'Open project diagnostic [Q]uickfix list' })
 vim.keymap.set('n', '[d', function()
-  vim.diagnostic.goto_prev()
-  vim.diagnostic.open_float { focus = false }
+  vim.diagnostic.jump { count = -1, float = true }
 end, { desc = 'Previous diagnostic and show details' })
 
 vim.keymap.set('n', ']d', function()
-  vim.diagnostic.goto_next()
-  vim.diagnostic.open_float { focus = false }
+  vim.diagnostic.jump { count = 1, float = true }
 end, { desc = 'Next diagnostic and show details' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -983,12 +1024,6 @@ require('lazy').setup({
         additional_vim_regex_highlighting = { 'ruby' },
       },
       indent = { enable = true, disable = { 'ruby' } },
-
-      rainbow = {
-        enable = true,
-        extended_mode = true, -- Also highlight non-bracket delimiters like HTML tags
-        max_file_lines = 1000, -- Disable for large files
-      },
 
       -- Add folding support
     },

@@ -88,25 +88,48 @@ return {
       }
     end,
   },
-  -- Rainbow brackets via treesitter
+  -- Rainbow brackets via treesitter (modern replacement for nvim-ts-rainbow)
   {
-    'p00f/nvim-ts-rainbow',
+    'HiPhish/rainbow-delimiters.nvim',
     event = { 'BufReadPost', 'BufNewFile' },
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    config = function()
+      local rainbow_delimiters = require 'rainbow-delimiters'
+
+      vim.g.rainbow_delimiters = {
+        strategy = {
+          [''] = rainbow_delimiters.strategy['global'],
+          vim = rainbow_delimiters.strategy['local'],
+        },
+        query = {
+          [''] = 'rainbow-delimiters',
+          lua = 'rainbow-blocks',
+        },
+        priority = {
+          [''] = 110,
+          lua = 210,
+        },
+        highlight = {
+          'RainbowDelimiterRed',
+          'RainbowDelimiterYellow',
+          'RainbowDelimiterGreen',
+          'RainbowDelimiterCyan',
+          'RainbowDelimiterBlue',
+          'RainbowDelimiterViolet',
+        },
+      }
+    end,
   },
-  -- Rainbow indent guides
+  -- Rainbow indent guides (indent-blankline v3)
   {
     'lukas-reineke/indent-blankline.nvim',
+    main = 'ibl',
     event = { 'BufReadPost', 'BufNewFile' },
-    config = function()
-      require('indent_blankline').setup {
+    opts = {
+      indent = {
         char = '│',
-        buftype_exclude = { 'terminal', 'help' },
-        show_trailing_blankline_indent = false,
-        show_current_context = false,
-        filetype_exclude = { 'help', 'startify', 'dashboard', 'packer', 'neogitstatus' },
-        -- Use space-separated highlight groups to create a rainbow effect
-        char_highlight_list = {
+        tab_char = '│',
+        highlight = {
           'IndentBlanklineChar1',
           'IndentBlanklineChar2',
           'IndentBlanklineChar3',
@@ -114,7 +137,12 @@ return {
           'IndentBlanklineChar5',
           'IndentBlanklineChar6',
         },
-      }
-    end,
+      },
+      scope = { enabled = false },
+      exclude = {
+        buftypes = { 'terminal' },
+        filetypes = { 'help', 'startify', 'dashboard', 'packer', 'neogitstatus', 'lazy' },
+      },
+    },
   },
 }
