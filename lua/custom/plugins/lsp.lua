@@ -22,7 +22,7 @@ return {
       local ok, client_mod = pcall(require, 'vim.lsp.client')
       if ok and client_mod and client_mod.Client then
         local Client = client_mod.Client
-        for _, name in ipairs({ '_register_dynamic', '_unregister_dynamic', '_register', '_unregister' }) do
+        for _, name in ipairs { '_register_dynamic', '_unregister_dynamic', '_register', '_unregister' } do
           local orig = Client[name]
           if type(orig) == 'function' then
             Client[name] = function(self, tbl)
@@ -36,7 +36,7 @@ return {
 
     -- Wrap LSP runtime handlers to defensively coerce nil params
     pcall(function()
-      local handlers = require('vim.lsp.handlers')
+      local handlers = require 'vim.lsp.handlers'
       local ms = require('vim.lsp.protocol').Methods
       local orig_reg = handlers[ms.client_registerCapability]
       if type(orig_reg) == 'function' then
@@ -215,10 +215,21 @@ return {
         },
       },
       rust_analyzer = {
-        -- ##### THIS IS THE FIX #####
-        -- Tell lspconfig to find the root by looking for .git or a Cargo.toml with [workspace]
-        root_dir = require('lspconfig.util').root_pattern('.git', 'Cargo.toml'),
-
+        capabilities = vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), {
+          general = {
+            positionEncodings = { 'utf-8' },
+          },
+          workspace = {
+            didChangeWatchedFiles = {
+              dynamicRegistration = true,
+            },
+          },
+        }),
+        on_attach = function(client, bufnr)
+          if client.server_capabilities.documentSymbolProvider then
+            require('nvim-navic').attach(client, bufnr)
+          end
+        end,
         settings = {
           ['rust-analyzer'] = {
             checkOnSave = {
@@ -269,7 +280,7 @@ return {
       'isort',
       'ruff',
       -- 'ruff-lsp', -- May not be available via Mason, install manually if needed
-      
+
       -- C/C++ formatters and linters
       'clang-format',
       'cpplint',

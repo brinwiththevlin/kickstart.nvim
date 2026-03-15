@@ -936,35 +936,7 @@ require('lazy').setup({
         -- disable_background = true,
       }
       -- Load the colorscheme
-      vim.cmd 'colorscheme rose-pine'
-    end,
-  },
-
-  -- Highlight todo, notes, etc in comments
-  {
-    'folke/todo-comments.nvim',
-    event = 'VimEnter',
-    dependencies = { 'nvim-lua/plenary.nvim' },
-    opts = {
-      signs = false,
-      keywords = {
-        TODO = { icon = ' ', color = 'info' },
-      },
-      highlight = {
-        keyword = 'fg',
-      },
-    },
-    config = function(_, opts)
-      require('todo-comments').setup(opts)
-
-      -- Override default tag navigation with todo navigation
-      vim.keymap.set('n', ']t', function()
-        require('todo-comments').jump_next()
-      end, { desc = 'Next todo comment' })
-
-      vim.keymap.set('n', '[t', function()
-        require('todo-comments').jump_prev()
-      end, { desc = 'Previous todo comment' })
+      require 'custom.colorscheme-persist'
     end,
   },
 
@@ -1088,3 +1060,5 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+--
+-- vim.api.nvim_set_hl(0, 'Normal', { bg = 'none' })

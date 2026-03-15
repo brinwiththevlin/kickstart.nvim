@@ -36,19 +36,19 @@ return {
   },
 
   -- Rose Pine color scheme
-  {
-    'rose-pine/neovim',
-    name = 'rose-pine',
-    config = function()
-      require('rose-pine').setup {
-        -- disable_background = true,
-        styles = {
-          italic = false,
-        },
-      }
-      vim.cmd [[colors rose-pine]]
-    end,
-  },
+  -- {
+  --   'rose-pine/neovim',
+  --   name = 'rose-pine',
+  --   config = function()
+  --     require('rose-pine').setup {
+  --       -- disable_background = true,
+  --       styles = {
+  --         italic = false,
+  --       },
+  --     }
+  --     -- vim.cmd [[colors rose-pine]]
+  --   end,
+  -- },
 
   -- Gruvbox color scheme
   {
@@ -108,5 +108,10 @@ return {
       vim.g.nord_italic = false
       -- vim.cmd([[colorscheme nord]])
     end,
+  },
+  {
+    'GhostVox/subliminal.nvim',
+    lazy = false,
+    priority = 1000,
   },
 }

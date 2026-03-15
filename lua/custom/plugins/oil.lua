@@ -12,6 +12,9 @@ return {
       'size',
       'mtime',
     },
+    win_options = {
+      signcolumn = 'yes:2',
+    },
     -- Delete to trash for safety (can recover mistakes)
     delete_to_trash = true,
     -- Skip confirmation for simple operations (rename, delete single file)
@@ -101,7 +104,8 @@ return {
     },
   },
   dependencies = {
-    { 'echasnovski/mini.icons', opts = {} },
+    { 'nvim-tree/nvim-web-devicons', opts = {} },
   },
   lazy = false,
 }
+
