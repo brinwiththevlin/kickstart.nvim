@@ -117,6 +117,18 @@ return {
           'RainbowDelimiterBlue',
           'RainbowDelimiterViolet',
         },
+        blacklist = {
+          'nofile',
+          'terminal',
+          'help',
+          'qf',
+          'oil',
+          'noice',
+        },
+        condition = function(bufnr)
+          local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+          return ok and parser ~= nil
+        end,
       }
     end,
   },
